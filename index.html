@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UVB-76 - Radio Station Log Archive</title>
+    <style>
+        /* сброс отступов ВЕЗДЕ*/
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box; /* расчёт общая ширина и высота элемента */
+        }
+
+        /* sorry for BODY-ROCKING*/
+        body {
+            font-family: 'Courier New', monospace; 
+            background: linear-gradient(to bottom, #0a0e27 0%, #1a1528 50%, #2d1b3d 100%); /* рертове.. верторе.. ретро короче */
+            min-height: 100vh; /* минимальная высота в 100% ВЫСОТЫ окна просмотра */
+            position: relative; /* необходимо для позиционирования псевдоэлементов иначе не работает */
+            overflow-x: hidden; /* скрскрскрывает горизонтальную прокрутку */
+        }
+
+        /* ПСЕВДОэлемент для создания эффекта сканлиний (полосы вот эти) поверх всего */
+        body::after {
+            content: ''; /* обязательно для псевдоэлементов */
+            position: fixed; /* фиксированное положение относительно окна */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient( /* повторяющийся линейный градиент */
+                0deg,
+                rgba(0, 0, 0, 0.15) 0px,
+                transparent 2px,
+                transparent 4px,
+                rgba(0, 0, 0, 0.15) 6px
+            );
+            z-index: 9998; /* оочень высокий z-index чтобы быть поверх почти всего */
+            pointer-events: none; /* элемент не будет мешать кликам мыши */
+            animation: scanlines 8s linear infinite; /* примеменение анимации */
+        }
+
+        /* анимация для скан-линий создает эффект легкого дрожания (ничего не заметно) */
+        @keyframes scanlines {
+            0% {
+                transform: translateY(0); /* начпол */
+            }
+            100% {
+                transform: translateY(10px); /* конпол сдвиг на 10px */
+            }
+        }
+
+        /* псевдоэлемент для создания фоновой ретросетки с перспективо */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient( /* горизонтальные линии сетки */
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 0, 136, 0.08) 2px,
+                    rgba(255, 0, 136, 0.08) 4px
+                ),
+                repeating-linear-gradient( /* вертикальные линии сетки */
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 255, 0.08) 2px,
+                    rgba(0, 255, 255, 0.08) 4px
+                );
+            z-index: 0; /* самый НИЖНИЙ слой */
+            pointer-events: none; /* не мешает кликам */
+            animation: gridScroll 20s linear infinite; /* анимациё прокрутки сетки */
+        }
+
+        /* эффект медленного движения в 3 ДЭ ПЕРСПЕКТИВО */
+        @keyframes gridScroll {
+            0% {
+                transform: perspective(500px) rotateX(60deg) translateY(0);
+            }
+            100% {
+                transform: perspective(500px) rotateX(60deg) translateY(50px);
+            }
+        }
+
+        /* относпоз остального */
+        .header, .nav, .container {
+            position: relative; /* позиция относительно потоко */
+            z-index: 9999; /* высший z-index чтобы быть над скан-линиями А У НИХ ОН НИЗШИЙ */
+        }
+
+        /* head шапко как раз */
+        .header {
+            background: linear-gradient(to bottom, rgba(255, 0, 136, 0.2), rgba(139, 0, 139, 0.3)); /* полупрозрачный фон */
+            border-bottom: 3px solid #ff0088; /* ЯРКАЯ нижняя граница */
+            padding: 15px 20px; 
+            text-align: center; 
+            box-shadow: 0 0 30px rgba(255, 0, 136, 0.5); 
+        }
+
+        .header h1 {
+            font-size: 48px; 
+            font-style: italic; 
+            color: #00ffff; 
+            font-weight: bold; 
+            letter-spacing: 4px; 
+            text-shadow: /* вот тут NEON LIGHT */
+                0 0 10px #00ffff,
+                0 0 20px #00ffff,
+                0 0 30px #ff0088,
+                2px 2px 0 #ff0088;
+            animation: glow 2s ease-in-out infinite alternate; /* /effect add glow @a 600 600*/
+        }
+
+        /* подзаголовко*/
+        .header-subtitle {
+            color: #ff0088; /* розовый (magenta) цвет (color) */
+            font-size: 14px;
+            margin-top: 5px; /* отступ (margin) сверху (top) */
+            text-shadow: 0 0 10px #ff0088; /* текс (text) тень (shadow) */
+            letter-spacing: 3px;
+        }
+
+        /* SHADOW PULS AR-15 */
+        @keyframes glow {
+            from {
+                text-shadow: 
+                    0 0 10px #00ffff,
+                    0 0 20px #00ffff,
+                    0 0 30px #ff0088,
+                    2px 2px 0 #ff0088;
+            }
+            to {
+                text-shadow: 
+                    0 0 20px #00ffff,
+                    0 0 30px #ff0088,
+                    0 0 40px #ff0088,
+                    2px 2px 0 #ff0088;
+            }
+        }
+
+        /* horizontal menu */
+        .nav {
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.4), rgba(75, 0, 130, 0.4));
+            border-bottom: 2px solid #00ffff;
+            height: 50px; 
+            padding-top: 0.1px; /* вот это вот в лекции было ВСЁ ПОМНЮ*/
+            box-shadow: 0 3px 20px rgba(255, 0, 136, 0.3); 
+            overflow: hidden; /* раньше тут был FLEX но теперь добавлен overflow для содержания float Я MENTALLY STABLE*/
+        }
+
+        /* left sidebar */
+        .nav-left {
+            float: left; /* ))) */
+        }
+
+        /* right sidebar */
+        .nav-right {
+            float: right; /* )))))))))))))) */
+        }
+
+
+        /* ЭТА ЧАСТЬ ПОСВЯЩЕНА ССЫЛКАМ В ГЛАВНОМ МЕНЮ. НЕ РАБОТАЕТ */
+        /* НЕ РАБОТАЕТ */
+        .nav a.pt {
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.3), rgba(75, 0, 130, 0.3));
+            text-decoration: none; /* УБРАТЬ ПОДЧЁРКИВАНИЕ*/
+            font-size: 16px;
+            text-align: center;
+            display: block; /* float)) */
+            height: 50px; 
+            line-height: 50px; 
+            border-right: 1px solid #ff0088; /* разделитель */
+            padding: 0 40px; 
+            color: #00ffff;
+            text-transform: uppercase; 
+            font-weight: 700;
+            transition: all 0.3s ease; /* переход */
+            text-shadow: 0 0 5px #00ffff;
+            white-space: nowrap; /* запрет переноса текста */
+        }
+
+        /* эффект при наведении на пункт меню */
+        .nav a.pt:hover {
+            background: linear-gradient(to bottom, rgba(255, 0, 136, 0.5), rgba(139, 0, 139, 0.5));
+            text-shadow: 0 0 10px #ff0088, 0 0 20px #ff0088;
+            color: #ffffff;
+        }
+
+        /* контейнер для пункта меню, у которого есть выпадающий список */
+        /* напоминание оно НЕ РАБОТАЕТ*/
+        .nav > .nav-left > div {
+            position: relative;
+            float: left; 
+        }
+
+    
+        .nav > .nav-left > a.pt {
+             float: left;
+        }
+        
+        /* Ссылке .pt ВНУТРИ выпадающего списка убираем правую границу она есть у родителя .div а нужно убрать */
+        .nav > .nav-left > div > a.pt {
+            border-right: none;
+        }
+        /* ... и добавляем эту границу самому контейнеру .div :kissemoji: */
+        .nav > .nav-left > div {
+             border-right: 1px solid #ff0088;
+        }
+
+        /* ---- КОНЕЦ РАБОЧЕЙ ЧАСТИ---- */
+
+
+        /* общий стиль для контейнеров пунктов меню */
+        .nav > div {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* сам блок выпадающего меню (НЕ РАБОТАЕТ)*/
+        .nav div .drop {
+            position: absolute; /* Абсолютное позиционирование относительно родителя */
+            display: none; /* Изначально скрыт */
+            top: 100%; /* Появляется точно под родительским пунктом */
+            left: 0;
+            z-index: 10000; /* Выше всех */
+            min-width: 100%; /* Минимальная ширина - как у родителя */
+        }
+
+        /* показывает (должен) выпадающее меню при наведении на родительский контейнер */
+        /* была попытко заставить работать .div имеет высоту 50px от .a.pt но нет*/
+        .nav > .nav-left > div:hover .drop {
+            display: block;
+        }
+
+        /* элементы внутри выпадающего меню */
+        .drop_item {
+            text-decoration: none;
+            display: block; /* элементы друг под другом */
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.9), rgba(75, 0, 130, 0.9)); /* Более плотный фон */
+            color: #00ffff;
+            border-bottom: 1px solid #ff0088;
+            border-right: 1px solid #ff0088;
+            border-left: 1px solid #ff0088;
+            padding: 12px 30px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        /* верхняя граница для первого элемента чтобы закрыть рамку */
+        .drop_item:first-child {
+            border-top: 1px solid #ff0088;
+        }
+
+        /* эффект при наведении на элемент выпадающего меню */
+        .drop_item:hover {
+            background: linear-gradient(to bottom, rgba(255, 0, 136, 0.9), rgba(139, 0, 139, 0.9));
+            text-shadow: 0 0 10px #ff0088;
+            color: #ffffff;
+        }
+
+        /* основной контейнер контенто */
+        .container {
+            max-width: 1400px; 
+            margin: 80px auto 20px; 
+            padding: 0 10px;
+        }
+
+        /* левая колонко сайдбар */
+        .left-column {
+            float: left; /* ПОЛНЕЙШЕЕ ОБТЕКАНИЕ СПАСИБО ЗА FLOAT */
+            width: 180px; 
+            margin-right: 15px; /* отступ справа от центра */
+        }
+
+        /* левая колонко */
+        .news-block {
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.6), rgba(75, 0, 130, 0.6));
+            border: 2px solid #ff0088;
+            border-radius: 8px; 
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.4); 
+            margin-bottom: 15px; 
+            backdrop-filter: blur(5px); /*размытие фона сам обалдел */
+        }
+
+        /* заголовок H3 в блоке новостей */
+        .news-block h3 {
+            color: #00ffff;
+            font-size: 18px;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 2px solid #00ffff; 
+            padding-bottom: 8px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+    
+        .news-content {
+            font-size: 13px;
+            line-height: 1.6; 
+            color: #ffffff;
+            text-align: justify; 
+        }
+
+        .news-content strong {
+            color: #ff0088;
+            text-shadow: 0 0 5px #ff0088;
+        }
+
+        /* правая КОЛОНКО сайдбар */
+        .right-column {
+            float: right; 
+            width: 180px;
+            margin-left: 15px; 
+        }
+
+        /* контакты */
+        .contacts-block {
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.6), rgba(75, 0, 130, 0.6));
+            border: 2px solid #00ffff; /* задал другой цвет рамки для контраста */
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+            margin-bottom: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* заголовок блока контактов */
+        .contacts-block h3 {
+            color: #ff0088;
+            font-size: 18px;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 2px solid #ff0088;
+            padding-bottom: 8px;
+            text-shadow: 0 0 10px #ff0088;
+        }
+
+        /* контент блока контактов */
+        .contacts-content {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #ffffff;
+        }
+
+        /* выделение (жирный текст) в блоке контактов */
+        .contacts-content strong {
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        /* список в блоке контактов */
+        .contacts-content ul {
+            list-style: none; /* убраны стандартные маркеры */
+            margin-top: 10px;
+        }
+
+        /* элементы списка */
+        .contacts-content li {
+            margin-bottom: 8px;
+            padding-left: 15px; /* отступ для кастомного маркера */
+            position: relative;
+        }
+
+        /* кастомный маркер (стрелочка вот эта) */
+        .contacts-content li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #ff0088;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff0088;
+        }
+
+        /* WTYNH тьфу ты ЦЕНТР */
+        .center-column {
+            overflow: hidden; /* важно для работы с float чтобы колонка "видела" сайдбары */
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.5), rgba(75, 0, 130, 0.5));
+            border: 2px solid #ff0088;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 136, 0.5);
+            min-height: 600px; /* минимальная высота */
+            backdrop-filter: blur(5px);
+        }
+
+        /* заголовко H2 в центральной колонке */
+        .center-column h2 {
+            color: #00ffff;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 3px solid #00ffff;
+            padding-bottom: 10px;
+            text-shadow: 0 0 15px #00ffff;
+        }
+
+        /* кнопко декодирования (вот это DECODE MORE MESSAGES) внутри контента */
+        .decode-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff0088 0%, #00ffff 100%);
+            color: #000000;
+            text-decoration: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 8px;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.6), 0 0 40px rgba(0, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            animation: pulse 2s ease-in-out infinite;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .decode-button:hover {
+            background: linear-gradient(135deg, #00ffff 0%, #ff0088 100%);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 0, 136, 1), 0 0 60px rgba(0, 255, 255, 0.8);
+            color: #ffffff;
+        }
+
+        .decode-button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .warning-banner {
+            background: linear-gradient(135deg, rgba(255, 0, 136, 0.3), rgba(255, 107, 53, 0.3)); /* Градиент с оранжевым */
+            border: 2px solid #ff0088;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.5);
+        }
+
+        .warning-banner h3 {
+            color: #00ffff;
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .warning-banner p {
+            color: #ffffff;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* cетка (а вы заметили что первая C написана латиницей) для блоков с логами */
+        .log-grid {
+            text-align: center; 
+            font-size: 0; 
+            margin-top: 20px;
+        }
+
+        /* БАЗОвый стиль для одного блока лога */
+        .base {
+            position: relative; /* для позиционирования .layer */
+            width: 280px; /* фиксированная ширина */
+            height: 200px; /* фффффиксированная высота */
+            border: 3px solid #ff0088;
+            background: linear-gradient(135deg, rgba(255, 0, 136, 0.3) 0%, rgba(139, 0, 139, 0.3) 100%);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            overflow: hidden; /* скрывает .layer который выходит за пределы */
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.6);
+            backdrop-filter: blur(3px); /* лёгкое размытие */
+            
+            /* ИЗМЕНЕНИЯ для замены flex-grid :* */
+            display: inline-block; 
+            vertical-align: top; 
+            margin: 10px; 
+            font-size: 14px; /* восстанавливаем размер шрифта после font-size: 0 */
+            text-align: left;
+        }
+
+        .base a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            color: inherit; 
+        }
+
+        .log-content {
+            padding: 15px;
+            color: white;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+
+        .log-time {
+            font-size: 16px;
+            color: #00ffff;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .log-message {
+            font-size: 13px;
+            color: #ffffff;
+        }
+
+        .layer {
+            position: absolute;
+            top: 0;
+            left: -100%; 
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            background: linear-gradient(135deg, rgba(255, 0, 136, 0.95) 0%, rgba(139, 0, 139, 0.95) 100%); 
+            transition: left 0.4s ease; 
+            color: white;
+            font-size: 16px;
+            padding: 20px;
+            text-align: center;
+            pointer-events: none; 
+            padding-top: 20px; 
+        }
+
+       
+        .layer-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+        }
+
+     
+        .layer-description {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+      
+        .base:hover .layer {
+            left: 0;
+            z-index: 10;
+        }
+
+        /* чистка потока clearfix для контейнера с float-колонками */
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* вертикальное меню (в левой колонке) */
+        .vertical-menu {
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.6), rgba(75, 0, 130, 0.6));
+            border: 2px solid #ff0088;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        /* пункт вертикального меню */
+        .vertical-menu .menu-item {
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.3), rgba(75, 0, 130, 0.3));
+            text-decoration: none;
+            display: block;
+            padding: 12px 15px;
+            color: #00ffff;
+            font-weight: 700;
+            border-bottom: 1px solid #ff0088; 
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        /* скругление углов у первого элемента */
+        .vertical-menu .menu-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        /* скругление углов у последнего элемента и удаление границы */
+        .vertical-menu .menu-item:last-child {
+            border-radius: 0 0 6px 6px;
+            border-bottom: none;
+        }
+
+        /* эффект при наведении на пункт верт. меню */
+        .vertical-menu .menu-item:hover {
+            background: linear-gradient(to bottom, rgba(255, 0, 136, 0.5), rgba(139, 0, 139, 0.5));
+            padding-left: 20px; /* Сдвиг текста вправо */
+            text-shadow: 0 0 10px #ff0088;
+            color: #ffffff;
+        }
+
+        /* контейнер для подменю для позиционирования */
+        .vertical-menu .submenu-container {
+            position: relative;
+        }
+
+        /* само подменю (скрыто) */
+        .vertical-menu .submenu {
+            display: none;
+            background: rgba(75, 0, 130, 0.8);
+        }
+
+        /* показ подменю при наведении */
+        .vertical-menu .submenu-container:hover .submenu {
+            display: block;
+        }
+
+        /* элементы подменю */
+        .vertical-menu .submenu .submenu-item {
+            background: linear-gradient(to bottom, rgba(139, 0, 139, 0.4), rgba(75, 0, 130, 0.4));
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px 10px 30px; 
+            color: #ffffff;
+            border-bottom: 1px solid #ff0088;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        /* эффект при наведении на элемент подменю */
+        .vertical-menu .submenu .submenu-item:hover {
+            background: linear-gradient(to bottom, rgba(255, 0, 136, 0.5), rgba(139, 0, 139, 0.5));
+            padding-left: 35px; /* ещё больший сдвиг */
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* кнопко в главном меню (справа) */
+        .nav-game-button {
+            display: block; 
+            height: 50px; 
+            line-height: 50px; 
+            background: linear-gradient(135deg, #ff0088 0%, #00ffff 100%); 
+            color: #000000; 
+            text-decoration: none;
+            padding: 0 30px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            text-shadow: none; 
+            animation: navPulse 2s ease-in-out infinite; /* анимация пульсации */
+        }
+
+        /* анимация пульсации для кнопки в меню (через внутреннюю тень) */
+        @keyframes navPulse {
+            0%, 100% {
+                box-shadow: inset 0 0 20px rgba(255, 0, 136, 0.5);
+            }
+            50% {
+                box-shadow: inset 0 0 30px rgba(0, 255, 255, 0.8);
+            }
+        }
+
+        .nav-game-button:hover {
+            background: linear-gradient(135deg, #00ffff 0%, #ff0088 100%); /* инверсия градиента */
+            color: #ffffff; /* Белый текст */
+            text-shadow: 0 0 10px #ffffff;
+        }
+        
+        .game-button-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* стили для большой кнопки */
+        .game-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff0088 0%, #00ffff 100%);
+            color: #000000;
+            text-decoration: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 8px;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 30px rgba(255, 0, 136, 0.8), 0 0 50px rgba(0, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            animation: pulse 2s ease-in-out infinite; 
+        }
+
+        /* анимация пульсации для большой кнопки через внешнюю тень */
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(255, 0, 136, 0.8), 0 0 50px rgba(0, 255, 255, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(255, 0, 136, 1), 0 0 80px rgba(0, 255, 255, 0.8);
+            }
+        }
+
+        /* эффект при наведении на большую кнопку */
+        .game-button:hover {
+            background: linear-gradient(135deg, #00ffff 0%, #ff0088 100%);
+            transform: translateY(-2px) scale(1.05); /* Легкий "подъем" */
+            box-shadow: 0 0 50px rgba(255, 0, 136, 1), 0 0 80px rgba(0, 255, 255, 0.8);
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>UVB-76 ARCHIVE</h1>
+        <div class="header-subtitle">DO YOU LIKE CODING MESSAGES?</div>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-left">
+            <div>
+                <a class="pt" href="#">Home</a>
+                <div class="drop">
+                    <a class="drop_item" href="#">Main Page</a>
+                    <a class="drop_item" href="#">Contacts</a>
+                    <a class="drop_item" href="#">About Us</a>
+                </div>
+            </div>
+            <a class="pt" href="#">Messages</a>
+            <div>
+                <a class="pt" href="#">Decoded</a>
+                <div class="drop">
+                    <a class="drop_item" href="#">Recent Activity</a>
+                    <a class="drop_item" href="#">Code Analysis</a>
+                    <a class="drop_item" href="#">Pattern Recognition</a>
+                </div>
+            </div>
+            <a class="pt" href="#">Frequencies</a>
+            <a class="pt" href="#">About</a>
+        </div>
+        <div class="nav-right">
+            <a href="https://uvb76.vercel.app/" class="nav-game-button" target="_blank">▶ CONTACT US</a>
+        </div>
+    </nav>
+
+    <div class="container clearfix">
+        <aside class="left-column">
+            <div class="news-block">
+                <h3>RECENT ACTIVITY</h3>
+                <div class="news-content">
+                    <p><strong>10.28.2025:</strong> Another Tuesday. Unusual coded transmissions detected. The voice on the radio sounds tired. Maybe it wants a day off?</p>
+                    <p style="margin-top: 10px;"><strong>10.25.2025:</strong> New code words on the frequency. "BRYANSK” was repeated three times. If it's a joke, no one is laughing. If this is a signal, we're already too late.</p>
+                    <p style="margin-top: 10px;"><strong>10.20.2025:</strong> Station activity increases during happy hour. Coincidence? We think not.</p>
+                </div>
+            </div>
+
+            <div class="vertical-menu">
+                <div class="submenu-container">
+                    <a href="#" class="menu-item">Log Archive</a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">2025</a>
+                        <a href="#" class="submenu-item">2024</a>
+                        <a href="#" class="submenu-item">2023</a>
+                    </div>
+                </div>
+                <a href="#" class="menu-item">Frequencies</a>
+                <div class="submenu-container">
+                    <a href="#" class="menu-item">Intel</a>
+                    <div class="submenu">
+                        <a href="#" class="submenu-item">About Station</a>
+                        <a href="#" class="submenu-item">FAQ</a>
+                        <a href="#" class="submenu-item">Contact</a>
+                    </div>
+                </div>
+                <a href="#" class="menu-item">Community</a>
+            </div>
+        </aside>
+
+        <aside class="right-column">
+            <div class="contacts-block">
+                <h3>CONTACT</h3>
+                <div class="contacts-content">
+                    <p><strong>Location:</strong><br>
+                    Miami, FL<br>
+                    34, Zaki Validi st.</p>
+                    <p style="margin-top: 10px;"><strong>Phone:</strong><br>
+                    Authorized personnel only</p>
+                    <p style="margin-top: 15px;"><strong>Services:</strong></p>
+                    <ul>
+                        <li>Late night radio</li>
+                        <li>Cryptic messages</li>
+                        <li>Pattern analysis</li>
+                        <li>Chicken delivery</li>
+                        <li>IT Recruitment and research</li>
+                        <li>FAMILY-FRIENDLY CONTENT</li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <main class="center-column">
+            <div class="warning-banner">
+                <h3>MIAMI SIGNAL NODE #76</h3>
+                <p>Routine signal check. Nothing unusual. Standard broadcast cycle. Clearance Level 3 required.</p>
+            </div>
+
+            <h2>Latest Intercepted Messages (10.28.2025)</h2>
+            
+            <div class="log-grid">
+                <div class="base">
+                    <a href="https://uvb76.vercel.app/" style="text-decoration: none; color: inherit;">
+                        <div class="log-content">
+                            <div class="log-time">10:52 EST</div>
+                            <div class="log-message">
+                                CALL: 03245<br>
+                                UDMURT<br>
+                                1089 3317
+                            </div>
+                        </div>
+                        <div class="layer">
+                            <div class="layer-title">"Udmurt"</div>
+                            <div class="layer-description">
+                                Standard voice transmission. Looks like the guy needs coffee. The codeword UDMURT is maybe his name?
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="base">
+                    <a href="https://uvb76.vercel.app/" style="text-decoration: none; color: inherit;">
+                        <div class="log-content">
+                            <div class="log-time">12:24 EST</div>
+                            <div class="log-message">
+                                CALL: 99105<br>
+                                KUCHMA<br>
+                                5528 6989
+                            </div>
+                        </div>
+                        <div class="layer">
+                            <div class="layer-title">"Kuchma"</div>
+                            <div class="layer-description">
+                                KUCHMA replied. Finally. We've been waiting since last Tuesday.
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="base">
+                    <a href="https://uvb76.vercel.app/" style="text-decoration: none; color: inherit;">
+                        <div class="log-content">
+                            <div class="log-time">14:01 EST</div>
+                            <div class="log-message">
+                                CALL: 01204<br>
+                                DIPLOMAT<br>
+                                3226 4768
+                            </div>
+                        </div>
+                        <div class="layer">
+                            <div class="layer-title">"Diplomat"</div>
+                            <div class="layer-description">
+                                The usual daytime broadcast. The code word DIPLOMAT is repeated a second time. Someone really likes this word.
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="base">
+                    <a href="https://uvb76.vercel.app/" style="text-decoration: none; color: inherit;">
+                        <div class="log-content">
+                            <div class="log-time">16:35 EST</div>
+                            <div class="log-message">
+                                CALL: 77423<br>
+                                TALKER<br>
+                                8821 2156
+                            </div>
+                        </div>
+                        <div class="layer">
+                            <div class="layer-title">"Talker"</div>
+                            <div class="layer-description">
+                                The evening show. Excellent signal quality. TALKER forgot his briefcase again.
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="base">
+                    <a href="https://uvb76.vercel.app/" style="text-decoration: none; color: inherit;">
+                        <div class="log-content">
+                            <div class="log-time">18:47 EST</div>
+                            <div class="log-message">
+                                CALL: 45678<br>
+                                BRUISE<br>
+                                9034 1287
+                            </div>
+                        </div>
+                        <div class="layer">
+                            <div class="layer-title">"Bruise"</div>
+                            <div class="layer-description">
+                                Late show. Slight interference. The code word BRUISE has been recorded. Maybe it's a nickname? Or just... A "bruise"?
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="base">
+                    <a href="https://uvb76.vercel.app/" style="text-decoration: none; color: inherit;">
+                        <div class="log-content">
+                            <div class="log-time">20:15 EST</div>
+                            <div class="log-message">
+                                CALL: 62901<br>
+                                JACKET<br>
+                                4453 7729
+                            </div>
+                        </div>
+                        <div class="layer">
+                            <div class="layer-title">Message #5225</div>
+                            <div class="layer-description">
+                                The nighttime broadcast completes the daily cycle. Someone's ordering pizza again. For the third time this week.
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="decode-button-container">
+                <a href="https://uvb76.vercel.app/" class="decode-button" target="_blank">▶ DECODE MORE MESSAGES</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
