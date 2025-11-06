@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MR BEAST APPROVED</title>
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #9fadc9;
+      text-align: center;
+    }
+
+    .top-container{
+      display: inline-block; 
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .sidebar{
+      display: inline-block;
+      width: 220px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      box-sizing: border-box;
+      position: relative;
+      vertical-align: center;
+    }
+
+    .mrbeast{
+      display: inline-block;
+      width: 300px;
+      margin-left: 20px;
+      position: relative;
+      
+    }
+
+     .mrbeast img{
+      width:100%;
+      height:auto;
+      display:block;
+      transition: opacity 0.3s ease;
+    }
+    .mrbeast:hover img{
+      content: url("img/mrbeastlike.png");
+    }
+
+    .approved{
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      font-size:22px;
+      font-weight:bold;
+      margin-top:8px;
+      letter-spacing:5px;
+    }
+    .approved span:nth-child(1){color:#ff1e1e}
+    .approved span:nth-child(2){color:#ff9a00}
+    .approved span:nth-child(3){color:#ffee00}
+    .approved span:nth-child(4){color:#33ff00}
+    .approved span:nth-child(5){color:#00ccff}
+    .approved span:nth-child(6){color:#0055ff}
+    .approved span:nth-child(7){color:#aa00ff}
+    .approved span:nth-child(8){color:#ff0077}
+    .approved span:nth-child(9){color:#ff0000}
+    .approved span:nth-child(10){color:#00bfff}
+    .approved span:nth-child(11){color:#00ff7f}
+    .approved span:nth-child(12){color:#ff69b4}
+    .approved span:nth-child(13){color:#ff4500}
+    .approved span:nth-child(14){color:#1e90ff}
+    .approved span:nth-child(15){color:#9400d3}
+
+    .content{
+      max-width:800px;
+      margin:40px auto 0;
+      text-align:left;
+      background:#fff;
+      border-radius:6px;
+      padding:20px;
+    }
+
+    /* Main menu */
+    .vmenu{list-style:none;margin:0;padding:0}
+    .vmenu>li{position:relative}
+    .vmenu a{
+      display:block;
+      text-decoration:none;
+      color:#1b2b45;
+      padding:10px 12px;
+      border-radius:4px;
+      margin:4px 0;
+      font-weight:600;
+      background:linear-gradient(#ffffff,#f4f6fb);
+      border:1px solid transparent;
+    }
+    .vmenu a:hover{
+      background:linear-gradient(#f0f6ff,#e8f0ff);
+      border-color:#c8ddff;
+    }
+
+    /* Вложение 1 */
+    .vmenu li .submenu{
+      position:absolute;
+      left:100%;
+      top:0;
+      display:none;
+      min-width:200px;
+      background:#fff;
+      border:1px solid #ccc;
+      padding:6px;
+      border-radius:4px;
+      z-index:10;
+    }
+
+    .submenu li{position:relative}
+
+    /* Вложение 2 */
+    .submenu .submenu{
+      left:100%;
+      top:0;
+      display:none;
+      min-width:180px;
+      background:#fff;
+      border:1px solid #ccc;
+      padding:6px;
+      border-radius:4px;
+      z-index:20;
+    }
+
+    /* Появление подменю при наведении */
+    .vmenu li:hover > .submenu,
+    .submenu li:hover > .submenu {
+      display:block;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="top-container">
+    <aside class="sidebar">
+      <nav>
+        <ul class="vmenu">
+          <li><a href="index.html">Главная</a></li>
+          <li>
+            <a href="#">Отделы</a>
+            <ul class="submenu">
+              <li><a href="#">Продажи</a></li>
+              <li>
+                <a href="#">Поставщики</a>
+                <ul class="submenu">
+                  <li><a href="#">Азия</a></li>
+                  <li>
+                    <a href="#">Европа</a>
+                    <ul class="submenu">
+                      <li><a href="#">Германия</a></li>
+                      <li><a href="#">Франция</a></li>
+                      <li><a href="#">Италия</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="#">Америка</a></li>
+                </ul>
+              </li>
+              <li><a href="#">Склад</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#">Услуги</a>
+            <ul class="submenu">
+              <li><a href="#">Дизайн</a></li>
+              <li><a href="#">Печать</a></li>
+              <li><a href="#">Ремонт</a></li>
+            </ul>
+          </li>
+          <li><a href="#">Контакты</a></li>
+          <li><a href="#">О нас</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <div class="mrbeast">
+      <img src="img/mrbeast.png" alt="MrBeast">
+      <div class="approved">
+        <span>M</span><span>r</span><span>B</span><span>e</span><span>a</span><span>s</span><span>t</span>
+        <span> </span>
+        <span>A</span><span>P</span><span>P</span><span>R</span><span>O</span><span>V</span><span>E</span><span>D</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="content">
+    <h2>Работа над ошибками. Позиционирование.</h2>
+    <hr>
+<p>Каждый пункт меню <code>&lt;li&gt;</code> получает свойство <code>position: relative;</code>. Вложенные элементы с <code>position: absolute;</code> будут отталкиваться от позиций главного меню. 
+Каждое подменю будет позиционироваться относительно своего родительского пункта, а не всего потока.</p>
+<p>Вложенные списки подменю (элементы <code>ul.submenu</code>) имеют <code>position: absolute;</code>, поэтому они появляются сбоку от родителя. Смещения задаются свойствами:</p>
+<pre><code>.submenu {
+  position: absolute;
+  left: 100%;
+  top: 0;
+}
+</code></pre>
+
+<p><code>left: 100%</code> сдвигает подменю вправо ровно на ширину родительского пункта, поэтому оно появляется рядом, а не поверх него.<br>
+<code>top: 0</code> выравнивает верх подменю по верхнему краю родительского элемента.</p>
+
+<p>Каждый пункт подменю также имеет <code>position: relative;</code>, чтобы можно было добавить второй уровень вложенности. Второе подменю наследует тот же принцип:</p>
+<pre><code>.submenu .submenu {
+  position: absolute;
+  left: 100%;
+  top: 0;
+}
+</code></pre>
+
+<p>В итоге первое подменю появляется справа от основного пункта, второе подменю появляется справа от первого и т.д.</p>
+
+
+<p>При наведении на пункт меню включается CSS-правило:</p>
+<pre><code>.vmenu li:hover > .submenu,
+.submenu li:hover > .submenu {
+  display: block;
+}
+</code></pre>
+<p>Оно делает вложенный список видимым (<code>display: block</code>) и создаёт эффект раскрывающегося многоуровневого меню.</p>
+  </main>
+</body>
+</html>
